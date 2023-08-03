@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    #body_box{
+      display: flex;
+      height: 800px;
+      
+    }
+    #box{
+
+      height: 800px;
+      background-color: #f0f0f0;  
+      width: 100%;
+    }
+    #list{
+      
+        width: 800px;
+        height: 600px;
+        background-color: white;
+        margin: 0 auto;
+        border:1px solid #f0f0f0;
+        margin-top: 100px;
+    }
+    .name{
+        width: 80px;
+
+    }
+    .id{
+        width: 120px;
+
+    }
+    .tel{
+        width: 180px;
+
+    }
+    .gen{
+        width: 50px;
+    }
+    .date{
+        width: 190px;
+    }
+    .btn{
+        width: 180px;
+
+    }
+    .list{
+        height: 50px;
+        text-align: center;
+        line-height: 50px;
+    }
+  </style>
+
+
+<title>admin_main</title>
+</head>
+<body>
+  <div id="body_box">
+    <div th:replace="admin/admin_menu.html"></div>
+    <div id="box">
+        <h2 style="margin: 30px 0 0 20px;">[ 관리자 승인  ]</h2>
+        <div id="list" >
+            <div style="display: flex; border-bottom: 1px solid">
+                <div class="name list">이름</div>
+                <div class="id list">아이디</div>
+                <div class="tel list">연락처</div>
+                <div class="gen list">성별</div>
+                <div class="date list">가입 일</div>
+                <div class="btn list" > O  /  X</div>
+            </div>
+            <div th:if="${session.Approvallist != null}" th:each="mem : ${session.Approvallist}" style="display: flex; border-bottom: 1px solid #F0f0f0;">
+                <div th:text="${mem.name}" class="name list">이름</div>
+                <div th:text="${mem.id}" class="id list">아이디</div>
+                <div th:text="${mem.tel}" class="tel list">연락처</div>
+                <div th:text="${mem.gender}" class="gen list">성별</div>
+                <div th:text="${mem.reg_date}" class="date list">가입 일</div>
+                <div class="btn list" style="display: flex;" >
+                    <button type="button" 
+                        style="width: 80px; 
+                        height: 30px;
+                        margin: auto;"
+                        th:value="${mem.m_idx}"
+                        onclick="approval(this)"
+                        >
+                        승인
+                    </button>
+                </div>
+            </div>
+            <div th:if="${session.Approvallist == null}" style="height: 550px; text-align:center; line-height: 550px;">
+                <div>
+                    가입 신청 내역이 없습니다.
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+    
+  </div>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js" ></script>
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  function approval (member) {
+    var m_idx = member.value ;
+    console.log(m_idx);
+
+    if(confirm("정말로 승인하시겠습니까 ?")){
+       
+      $.ajax({
+        url: "/approval",
+        type: "post",
+        data: { 'm_idx': m_idx },
+        dataType: "json",
+      }).done(function (data) {
+
+        if(data.chk === 1){
+          alert("가입승인");
+          window.location.href="approval";
+        }
+      });
+                  console.log("승인" );
+        
+    }else{
+
+        console.log("승인 거절");
+    }
+
+  }
+
+/*]]*/
+</script>
+</body>
+</html>

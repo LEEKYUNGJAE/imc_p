@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pro.shop.mapper.CamMapper">
+    <insert id="AddData" parameterType="com.pro.shop.VO.CamVO">
+		  INSERT INTO board.camping (title, category, mapX, mapY, addr, `explain`, minutely, lunchtime, facilities, manner, animal, image, tel, page, cname)
+		  VALUES(#{title},#{category},#{addr},#{mapY},#{mapX},#{explain},#{minutely},#{lunchtime},#{facilities},#{manner},#{animal},#{image},#{tel},#{page},#{cname})
+    </insert>
+    
+    <delete id="del_data">
+        DELETE FROM board.camping
+    </delete>
+
+
+    <select id="cam_cnt" resultType="int" parameterType="Map">
+      SELECT COUNT(*) AS row_count
+      FROM board.camping
+      WHERE addr LIKE CONCAT('%', #{region}, '%') AND category LIKE CONCAT('%', #{category}, '%')
+    </select>
+    <select id="cam_list" resultType="com.pro.shop.VO.CamVO" parameterType="Map">
+      SELECT *
+      FROM (
+        SELECT RANK() OVER (ORDER BY camping.idx DESC) AS row_num, board.camping.*
+        FROM board.camping WHERE addr LIKE CONCAT('%', #{region}, '%') AND category LIKE CONCAT('%',#{category}, '%')
+      ) AS n
+      WHERE row_num BETWEEN #{begin} AND #{end}
+    </select>
+    <select id="rendom" resultType="com.pro.shop.VO.CamVO">
+      SELECT a.*
+      FROM (
+          SELECT @RN:= @RN+1 AS rownnum, b.*
+          FROM (SELECT * FROM board.camping) b, (SELECT @RN:= 0) r
+          ORDER BY RAND() 
+          LIMIT 3 ) a
+    </select>
+</mapper>

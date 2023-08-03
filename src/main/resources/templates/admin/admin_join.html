@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+		/* 브라우저 마진과 패딩 리셋 */
+		* {margin:0;padding:0;}
+
+    #joinbox{
+
+        width: 500px;
+        height: 580.2px;
+        margin: 0 auto;
+        border: 1px solid #dcdcdc;
+        border-radius: 5px;
+        margin-top: 150px;
+        margin-bottom: 150px;
+    }
+    div > input{
+        width: 70%;
+		height: 30px;
+		padding: 4px;
+		margin: 0 auto;
+
+    }
+    input[type="button"] {
+		display: block;
+		margin: 0 auto;
+		margin-top: 40px;
+		width: 100%;
+		height: 50px;
+		border: 1px solid #dcdcdc;
+		font-size: 20px;
+    }
+	input[type="button"]:hover {
+
+		background-color: #ded3d3;
+	}
+
+	.checkbox-container {
+	margin: 0 auto;
+    width: 70%;
+    height: 30px;
+	padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+	border: 1px solid black;
+	border-radius: 2px;	
+	}
+
+  .checkbox-container label,
+  .checkbox-container input[type="checkbox"] {
+	text-align: center;
+    width: 45%;
+  }
+  </style>
+<title>admin_join</title>
+</head>
+<body>
+    <div id="joinbox">
+        	<h2 style="width: 100%; text-align: center; margin-bottom: 50px; margin-top: 50px;">회원 가입</h2>
+			<input type="text"  id="userid" style="display: block;" placeholder="사용할 아이디를 입력해주세요">
+			<p id="idtext" style="width:70%; text-align: center; font-size: 5px; height:20px; line-height: 20px; margin: 0 auto; color: red; display: none;">
+				사용할수없는 아이디입니다.
+			</p>
+			<p style="width:70%;height:20px;" id="idtext2"></p>
+			<input type="password"  id="pw" style="display: block; margin-bottom: 20px;" placeholder="사용할 비밀번호를 6자리 이상 입력해주세요">
+			<input type="password"  id="pw2" style="display: block;" placeholder="사용할 비밀번호 확인하기">
+	
+			<p style="width:70%; text-align: center; font-size: 5px; height:20px; line-height: 20px; margin: 0 auto;"></p>
+            <input type="text"  id="name" style="display: block; margin-bottom: 20px;" placeholder="이름을 입력해주세요">
+			<input type="text"  id="tel" style="display: block; margin-bottom: 20px;" placeholder="-를 제외한 휴대폰 번호를 입력해주세요">
+			<input type="date"  id="birthdate" style="display: block; margin-bottom: 20px; text-align: center;" >
+			<div class="checkbox-container">
+				<label>남</label>
+				<input type="checkbox" class="gen" value="0">
+				<label>여</label>
+				<input type="checkbox" class="gen" value="1">
+			</div>
+			<input type="button" id="memberjoin" value="가입하기"/>
+
+    </div>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js" ></script>
+<script th:inline="javascript">
+  /*<![CDATA[*/
+
+$(document).ready(function() {
+    $('.gen').click(function() {
+      if ($(this).prop('checked')) {
+        $('.gen').not(this).prop('checked', false);
+      }
+    });
+});
+
+$("#memberjoin").click(function(){
+
+	var userId = $('#userid').val();
+    var password = $('#pw').val();
+  	var password2 = $('#pw2').val();
+    var name = $('#name').val();
+    var birthdate = $('#birthdate').val();
+    var gender = $('.gen:checked').val();
+	var tel =  $('#tel').val();
+
+
+	var idRegex = /^[A-Za-z0-9]+$/;
+
+	
+	if(userId.length == 0){
+		alert('아이디를 입력해주세요.');
+		$('#userid').focus();
+        return;
+	}else if (!idRegex.test(userId) ) {
+        alert('아이디는 영문자와 숫자만 입력 가능합니다.');
+		$('#userid').focus();
+        return;
+    }
+	if(password.length==0 ||password2.length==0){
+		alert('비밀번호를 입력해주세요.');
+		return;
+	}else if (password !== password2) {
+        alert('비밀번호가 일치하지 않습니다.');
+    	return;
+	}
+
+	if(name.length==0){
+		alert('이름을 입력해주세요.');
+		$('#name').focus();
+        return;
+	}
+
+	if (!/^[0-9]+$/.test(tel) || tel.length !== 11) {
+		alert('휴대폰 번호를 확인해주세요.');
+		$('#tel').focus();
+		return;
+  	}
+
+	if(birthdate.length==0){
+		alert('생년월일을 선택해주세요.');
+        return;
+	}
+
+	if (gender !== '0' && gender !== '1') {
+      	alert('성별 값을 선택해주세요.');
+      	return;
+    }
+
+ 	let from = { 'userId' : userId , 'password' : password , 'name' : name , 'birthdate' : birthdate , 'gender' : gender,'tel' : tel };
+
+	
+		$.ajax({
+			url: "/chkid",
+			data: { 'id': userId},
+			method: "POST",   
+			dataType: "json" 
+		}).done(function(json) {
+			console.log(json.chk);
+			if (json.chk === 1) {
+				alert("사용할수없는 아이디입니다.")
+			} else {
+				$.ajax({
+					url: "/adminjoin",
+					data: from,
+					method: "POST",   
+					dataType: "json" 
+				}).done(function(json) {
+					if(json.chk ===1){
+						alert("가입이 완료되었습니다.");
+						window.location.href = "/admin"
+					}else{
+						alert("회원가입에 실패했습니다.");
+					}
+				});
+			}
+		});
+});
+
+
+$("#userid").change(function(){
+
+	let id = $("#userid").val();
+	
+	console.log(id)
+
+	if(id.length>0){
+		$.ajax({
+			url: "/chkid",
+			data: { 'id': id},
+			method: "POST",   
+			dataType: "json" 
+		}).done(function(json) {
+
+			console.log(json.chk);
+			if (json.chk === 1) {
+				$("#idtext").show();
+				$("#idtext2").hide();
+				} else {
+				$("#idtext2").show();
+				$("#idtext").hide();
+			}
+		});
+	}	
+});
+
+
+$(document).ready(function() {
+  $("#male").change(function() {
+    if ($(this).is(":checked")) {
+      $("#female").prop("checked", false);
+    }
+  });
+
+  $("#female").change(function() {
+    if ($(this).is(":checked")) {
+      $("#male").prop("checked", false);
+    }
+  });
+});
+
+/*]]*/
+</script>
+</body>
+</html>

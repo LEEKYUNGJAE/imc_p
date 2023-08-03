@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>view</title>
+</head>
+<style>
+  #bbs {
+    width: 800px;
+    margin: 0 auto;
+    margin-top: 100px;
+    border: 1px solid #f0f0f0;
+  }
+  
+
+  .btn{
+    width: 60px;
+    height: 30px;
+    background-color: white;
+    border: 1px solid #DCDCDC;
+    border-radius: 3px;
+    pointer-events: stroke;
+  }
+
+  .btn:hover{
+
+    background-color: #d3d3d3;
+    cursor: pointer;
+  }
+  #content{
+    border-radius: 5px; 
+    width: 74%; 
+    height:100px; 
+    padding: 5px; 
+    margin:auto;
+  }
+  #comment_btn{
+    margin-left: 1%;
+    width: 16%;
+    height: 110px;
+    line-height: 100px; 
+    padding: 5px;  
+    margin:auto; 
+    margin-left: 0px; 
+    background-color: white;
+    border: 1px solid #D3d3d3;
+    border-radius: 8px; 
+    font-size: 15px;
+  }
+
+  #comment_btn:hover{
+    background-color: #D3d3d3;
+    cursor: pointer;
+  }
+
+  .com_del_btn{
+    align-self: flex-end; 
+    width: 50px; 
+    height: 25px; 
+    margin-left: 100px;
+    margin-bottom: 5px;
+    background-color: #DCDCDC;
+    border-radius: 4px;
+    border: 1px solid #D3d3d3;
+  }
+
+  .com_del_btn:hover {
+
+    background-color: #D3d3d3;  
+    cursor: pointer;;
+  }
+  
+  
+
+</style>
+
+<body>
+  <div  th:replace="shop/header.html"></div>
+
+  <div id="bbs">
+
+              <div style="display: flex; height: 80px; border-bottom: 1px solid #F0f0f0;">
+                <div style="width: 33.3%; margin-left: 10px; text-align: left; line-height: 80px;" th:text="${session.vo.id}"></div>
+                <div style="width: 33.3%; text-align: center;  line-height: 80px;" th:text="${session.vo.write_date}"></div>
+                <div style="width: 33.3%; text-align: right; margin-right: 10px;  line-height: 80px;" th:text="${'조회: '+session.vo.hit}"></div>
+              </div>  
+
+              <h3 th:text="${session.vo.subject}"  style="margin-left: 10px; margin-top: 10px; height: 80px;  line-height: 80px;"></h3>
+              <h3 th:text="${session.vo.price + '원'}"  style="margin-left: 10px; margin-top: 10px; height: 80px;  line-height: 80px;"></h3>
+              <div th:utext="${session.vo.content}" style="margin-left: 10px; margin-top: 10px; margin-bottom: 10px; margin-bottom: 50px;"></div>
+              <div th:if="${session.vo.file_name != null}" style="display: flex; border-top: 1px solid #f0f0f0; height: 40px;">
+                <p style="width: 120px; text-align: center; line-height: 40px; border-right: 1px solid #f0f0f0;">첨부파일</p>
+                <a th:if="${session.vo.file_name != null}" 
+                    th:href="@{/file_upload/__${session.vo.file_name}__}" 
+                    th:download="${session.vo.file_name}"
+                    style="padding: 10px;">
+                  <span th:text="${session.vo.file_name}"></span>
+                </a>
+              </div>
+              <div style="width: 100%; text-align: right; height: 40px; border-top: 1px solid #f0f0f0; ">
+                <div style="line-height: 40px;">
+                  <button  th:if="${session.member != null && session.vo.id == session.member.id}" id="eidt" class="btn">수정</button>
+                  <button th:if="${session.member != null && session.vo.id == session.member.id}" id="delete" class="btn">삭제</button>
+                  <button type="button" id="backlist" style="margin-right:3px;" class="btn">목록</button>
+                </div>
+                
+              </div>
+      <div style="width: 800px; height:130px; margin:0 auto; display: flex; background-color: #DCDCDC;"> 
+        <textarea id="content" name="content" placeholder="댓글을 입력해주세요."
+        ></textarea>
+        <button type="button" id="comment_btn">등록하기 </button>
+      </div>
+	</div>
+  <div th:if="${#lists.size(session.vo.c_list)>0}"th:each="com : ${session.vo.c_list}" style="padding: 5px;">
+    <div class="comment" style="width: 800px; margin: 0 auto; border: 1px solid #D3d3d3; border-top: none; border-radius: 6px;" > 
+      <div style="display: flex;">
+        <p th:text="${'작성자 : '+ com.id}" style="width: 50%; padding-top: 5px; padding-left: 5px;"></p>
+        <p th:text="${com.write_date}" style="width: 50%; padding-top: 5px; padding-right: 5px; text-align: right;"></p>
+      </div>
+      <div style="display: flex;">
+        <p th:text="${com.content}" style="padding-bottom:5px; padding-left: 5px; margin-top: 30px; word-wrap: break-word; width: 80%;"></p>
+        <button class="com_del_btn" th:if="${session.member !=null && session.member.id == com.id}" th:value="${com.c_idx}" onclick="ComDel(this)">삭제</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div th:replace="shop/footer.html"></div>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.0.min.js" ></script>
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  var b_idx = /*[[${session.vo.b_idx}]]*/;
+  var member=/*[[${session.member}]]*/ ;
+
+  $(function() {
+    $("#backlist").click(function() {
+      var bname = /*[[${session.vo.bname}]]*/; 
+
+      if(bname === "transaction"){
+        window.location.href = "/transaction";
+      }else if(bname === "notification"){
+        window.location.href = "/usernotification";
+      }else if(bname==="inquire"){
+        window.location.href = "/inquire";
+      }else
+        window.location.href = "/bbs";
+    });
+  });
+
+  $(function() {
+    $("#comment_btn").click(function() {
+      var content =$("#content").val();
+      var m_idx ;
+
+      if(member !== null){
+        m_idx = member.m_idx;
+
+        if(content.trim().length >0){
+          $.ajax({
+            url: "/comment",
+            data: {'b_idx' : b_idx , 'm_idx':m_idx ,'content': content},
+            method: "POST",   
+            dataType: "json" 
+          }).done(function(json){
+            if(json.chk ===1){
+              alert("댓글 작성 성공입니다.");
+              window.location.href = '/view?b_idx='+b_idx;
+            }else{
+              alert("댓글 작성 실패입니다.");
+              $("#content").val("");
+
+            }
+            
+
+          });
+          
+        }else{
+          alert("댓글을 입력해주세요.");
+          return;
+        }
+
+
+      }else{
+        alert("로그인이 필요한 활동입니다.");
+
+      }
+    });
+  });
+
+
+  $(function() {
+    let id;
+    let memberid;
+
+    $('#eidt').click(function() {
+      id = /*[[${session.vo.id}]]*/;
+
+
+      if (member !== null) {
+        memberid = member.id;
+        if (id === memberid) {
+          var form = $('<form method="post" action="/eidt"></form>');
+          form.append($('<input type="hidden" name="b_idx" value="' + b_idx + '">'));
+          form.appendTo('body').submit();
+        } else {
+          alert("글 수정이 불가능합니다.");
+        }
+      }
+    });
+  });
+
+  $(function() {
+    let id;
+    let memberid;
+
+    $('#delete').click(function() {
+      id = /*[[${session.vo.id}]]*/;
+      bname= /*[[${session.vo.bname}]]*/;
+      if (member !== null) {
+        memberid = member.id;
+        if (id === memberid) {
+          if (confirm("정말로 삭제하시겠습니까?")) {
+            var form = $('<form method="post" action="/delete"></form>');
+            form.append($('<input type="hidden" name="b_idx" value="' + b_idx + '">'));
+            form.append($('<input type="hidden" name="bname" value="' + bname + '">'));
+            form.appendTo('body').submit();
+          } else {
+            return;
+          }
+        } else {
+          alert("글 수정이 불가능합니다.");
+        }
+      }
+    });
+  });
+
+
+
+  function ComDel(c_idx){
+
+    $.ajax({
+            url: "/comment_del",
+            data: {'c_idx' :c_idx.value},
+            method: "POST",   
+            dataType: "json" 
+          }).done(function(json){
+            if(json.chk === 1){
+              alert("댓글을 삭제 성공입니다.");
+              window.location.href = '/view?b_idx='+b_idx;
+            }else{
+              alert("댓글 삭제 실패입니다.");
+            }
+            
+
+          });
+  }
+  /*]]*/
+</script>
+</div>
+</body>
+</html>

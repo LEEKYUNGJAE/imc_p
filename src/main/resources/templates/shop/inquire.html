@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+
+<title>inquire</title>
+<style>
+    /* 스타일을 적용하기 위한 CSS 코드 */
+    table {
+      
+      width: 1000px;
+      border-collapse: collapse;
+      margin: 0 auto;
+      margin-top: 150px;
+    }
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+      font-size: 15px;
+    }
+    th {
+      background-color: #f0f0f0;
+      text-align: center;
+    }
+    tr:hover {
+      background-color: #f5f5f5;
+    }
+    tfoot>tr:last-child:hover {
+      background-color: initial;
+    }
+    a {
+      text-decoration: none;
+      color: #333;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    td:nth-child(1) ,th:nth-child(1) {
+      width: 10%;
+      text-align: center;
+    }
+    td:nth-child(2) ,th:nth-child(2) {
+      width: 70%;
+      text-align: center;
+    }
+    td:nth-child(3) , th:nth-child(3) {
+      width: 10%;
+      text-align: center;
+    }
+    td:nth-child(4) ,th:nth-child(4) {
+      width: 10%;
+      text-align: center;
+    }
+
+    /* paging */
+	
+	table tfoot ol.paging {
+	    list-style:none;
+	}
+	
+	table tfoot ol.paging li {
+	    float:left;
+	    margin-right:8px;
+	}
+	
+	table tfoot ol.paging li a {
+	    display:block;
+	    padding:3px 7px;
+	    border:1px solid #d3d3d3;
+	    color:#2f313e;
+	    font-weight:bold;
+	    text-decoration: none;
+	}
+	
+	table tfoot ol.paging li a:hover {
+	    background: #dcdcdc;;
+	    color:white;
+	    font-weight:bold;
+	}
+	
+	.disable {
+	    padding:3px 7px;
+	    border:1px solid silver;
+	    color:silver;
+	}
+	
+	.now {
+	     padding:3px 7px;
+	    border:1px solid #d3d3d3;
+	    background:#d3d3d3;
+	    color:white;
+	    font-weight:bold;
+	}
+  #write ,#list{
+    width: 60px;
+    height: 30px;
+    background-color: white;
+    border: 1px solid #DCDCDC;
+    border-radius: 3px;
+  }
+  #write:hover , #list:hover{
+
+    background-color: #d3d3d3;
+    cursor: pointer;
+  }
+
+  #search_container{
+    width: 1000px;
+    margin: 0 auto;
+  }
+  #search{
+    width: 60px;
+    height: 30px;
+    background-color: white;
+    border: 1px solid #DCDCDC;
+    border-radius: 3px;
+  }
+
+  #search:hover{
+
+    background-color: #d3d3d3;
+    cursor: pointer;
+  }
+
+
+  </style>
+</head>
+<body>
+  <div th:replace="shop/header.html"></div> 
+  <div style="margin-top: 50px; height: 600px;">
+    <table>
+        <thead>
+          <tr>
+            <th>글 번호</th>
+            <th>글 제목</th>
+            <th>작성자</th>
+            <th>조회수</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr th:if="${session.bbs!=null}" th:each="bbs : ${session.bbs}">
+            <td th:text="${bbs.b_idx}"></td>
+            <td style="text-align: left; margin-left: 30px;">
+              <a th:if="${session.member !=null && bbs.id == session.member.id}" th:href="@{/view(b_idx=${bbs.b_idx})}" style="height: 100%; width: 100%;">
+                <span th:text="${bbs.subject} + (${#lists.size(bbs.c_list) > 0 ? ' (' + #lists.size(bbs.c_list) + ')' : ''})"
+                  style="overflow: hidden; white-space: nowrap;text-overflow: ellipsis; display: block; width: 600px;"
+                ></span>
+              </a>
+              <span th:if="${session.member == null || bbs.id != session.member.id}" th:text="${bbs.subject} + (${#lists.size(bbs.c_list) > 0 ? ' (' + #lists.size(bbs.c_list) + ')' : ''})"
+                style="overflow: hidden; white-space: nowrap;text-overflow: ellipsis; display: block; width: 600px;"
+               ></span>
+          </td>
+            <td th:text="${bbs.id}"></td>
+            <td th:text="${bbs.hit}"></td>
+          </tr>
+          <tr th:if="${session.bbs == null}">
+            <td colspan="4">
+              <div> 게시물이 존재하지 않습니다.</div> 
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th colspan="3" style="width: 90%;">
+                    <div style="margin-left: 20px;" th:utext="${session.page}"></div>
+                </th>
+                <th style="width: 10%;">
+                  <div  style="display: flex;">
+
+                    <button type="button" id="list" style="margin-right:3px;" onclick="location.href='inquire'">목록</button >
+                    <button type="button" id="write">글쓰기</button >
+                  </div>
+                </th>
+            </tr>
+            <tr>
+              <td colspan="4">
+                <div id="search_container">
+                  <select id="category" style="width: 120px; height: 30px; text-align: center;">
+                    <option value="1">제목</option>
+                    <option value="2">작성자</option>
+                    <option value="3">내용</option>
+                    <option value="4">제목+내용</option>
+                  </select>
+                  <input type="text" id="text"  style="width: 200px; height: 26px; padding-left: 2px;"/>
+                  <button type="button" id="search">검색</button>
+                </div>
+              </td>
+            </tr>
+        </tfoot>
+      </table>
+  </div>
+  
+  
+	<div th:replace="shop/footer.html"></div>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js" ></script>
+<script th:inline="javascript">
+/*<![CDATA[*/
+
+$(function(){
+  $('#write').click(function(){
+
+    if (/*[[${session.member}]]*/ !== null) {
+        window.location.href = "inquirewrite";
+   }else{
+        alert('글 작성은 로그인 후 가능합니다.');
+        window.location.href = 'login';
+   }
+  });
+});
+
+
+$(function(){
+  $('#search').click(function(){
+    var category = $("#category").val();
+    var text =  $("#text").val();
+
+    if (category !== null && text.trim().length >= 1) { 
+        window.location.href = "bbs?category="+category +"&text="+text;
+    }else{
+      alert("검색할 내용을 입력해주세요.");
+      $("#text").focus();
+    }
+
+  });
+});
+/*]]*/  
+
+</script>
+</body>
+</html>

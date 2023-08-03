@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+	/* 브라우저 마진과 패딩 리셋 */
+	* {margin:0;padding:0;}
+
+	#background{
+		background-image: url( "file_upload/camping.jpg" );
+		background-size: cover;
+		margin-top: 40px;
+		width: 100%;
+		height: 300px;
+		padding: 150px 0 ;
+	}
+
+	.title{
+		font-size: 80px;
+		color: black;
+		text-align: center;
+		font-weight: bold;
+	}
+	.title2{
+		margin-top: 30px;
+		font-weight: normal;
+		font-size: 50px;
+		margin: 0 auto;
+		text-align: center;
+	}
+	.container {
+		display: flex;
+		justify-content: center;
+
+		}
+
+	.box {
+		margin: 10px;;
+		width: 380px;
+		height: 500px;
+	} 
+  </style>
+  <title>main</title>
+</head>
+<body>
+	<div th:replace="shop/header.html"></div>
+	<div id="background">
+		<p class="title"> GO CAMPING </p>
+		<p class="title2" > 안녕하세요. 인크레파스학원을 수료한 이경재 입니다.</p>
+		<p class="title2" >잘부탁드립니다.</p>
+	</div>
+	<div style="width: 1200px; height: 60px; text-align: center; margin: 0 auto; margin-top: 40px; ">
+		<h1>TOPIC OF THE DAY</h1>
+	</div>
+	<div class="container">
+		<div class="box">
+			<div style="border-bottom: 3px solid black; padding-bottom: 5px; height: 50px; line-height: 50px;">
+				<h3>오늘의 CAMPING</h3>
+			</div>
+			<div th:each=" rendom : ${session.rendom}" style="display: flex; align-items: center;">
+				<div style="display: flex; justify-content: center; align-items: center; height: 150px; width: 152px; border-right: 1px solid #ded3d3; border-bottom: 1px solid #ded3d3;">
+					<img th:src="${rendom.image.length() > 1 ? rendom.image : 'file_upload/noimg.jpg' }" style="width: 70%;height: 70%;"/>
+				</div>
+				<div style="height: 150px; width: 228px; align-items: center; border-bottom: 1px solid #ded3d3;">
+					<div style="display: flex; height: 33%;">
+						<span style=" width: 50px; margin: auto; margin-left: 10px; ">제목 :</span>
+						<span th:text="${rendom.title}" style=" width: 178px; margin: auto; display: block ; overflow: hidden;white-space: nowrap;text-overflow: ellipsis; "></span>
+					</div>
+					<div style="display: flex; height: 33%;">
+						<span style=" width: 50px; margin: auto; margin-left: 10px;">주소 :</span>
+						<span  th:text="${rendom.addr}" style=" width: 178px; margin: auto; display: block ;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"></span>
+					</div>
+					<div style=" height: 33%; text-align: center;">
+						<a th:if="${rendom.page.length() > 0}" th:href="@{${rendom.page}}" style="display: block; border: 1px solid; border-radius: 5px; width: 150px; height: 30px; text-align: center; line-height: 30px; margin: auto;">홈페이지</a>
+					</div>	 
+				</div>
+			</div>
+		</div>
+		<div class="box">
+			<div style="height: 50px; line-height: 50px;">
+				<h3>오늘의 top 10</h3>
+			</div>
+			<div style="display: flex; border-top: 3px solid black; border-bottom: 0.5px solid #ded3d3; margin: 0 auto; margin-top: 5px; text-align: center; ">
+				<div style="width: 10%; height: 35px; margin: auto; line-height: 35px;">NO</div>
+				<div style="width: 80%; height: 35px;  line-height: 35px;">Title</div>
+			</div>
+			<div th:if="${session.BestBbs != null}"  th:each="bbs : ${session.BestBbs}">
+				<div style="display: flex; border-bottom: 0.5px solid #ded3d3; margin: 0 auto; text-align: center; ">
+					<div style="width: 10%; height: 40px; margin: auto; line-height: 40px;" th:text="${bbs.b_idx}"></div>
+					<div style="width: 80%; height: 40px;  line-height: 40px;">
+						<a th:href="@{/view(b_idx=${bbs.b_idx})}" 
+						th:text="${bbs.subject} + (${#lists.size(bbs.c_list) > 0 ? ' (' + #lists.size(bbs.c_list) + ')' : ''})"
+							style="display: block;
+									text-align: left;
+									margin-left: 5px;
+									overflow: hidden;
+									white-space: nowrap;
+									text-overflow: ellipsis;
+									color: black;
+									text-decoration: none;"></a>
+					</div>
+				</div>
+			</div> 
+		</div>
+		<div class="box">
+			<div style="height: 50px; line-height: 50px;">
+				<h3>가장 많이 본 상품</h3>
+			</div>
+			<div style="display: flex; border-top: 3px solid black; border-bottom: 0.5px solid #ded3d3; margin: 0 auto; margin-top: 5px; text-align: center; ">
+				<div style="width: 10%; height: 35px; margin: auto; line-height: 35px;">NO</div>
+				<div style="width: 80%; height: 35px;  line-height: 35px;">Title</div>
+			</div>
+			<div th:if="${session.BestTransaction != null}"  th:each="bbs : ${session.BestTransaction}">
+				<div style="display: flex; border-bottom: 0.5px solid #ded3d3; margin: 0 auto; text-align: center; ">
+					<div style="width: 10%; height: 40px; margin: auto; line-height: 40px;" th:text="${bbs.b_idx}"></div>
+					<div style="width: 80%; height: 40px;  line-height: 40px;">
+						<a th:href="@{/view(b_idx=${bbs.b_idx})}" 
+						th:text="${bbs.subject} + (${#lists.size(bbs.c_list) > 0 ? ' (' + #lists.size(bbs.c_list) + ')' : ''})"
+							style="display: block;
+									text-align: left;
+									margin-left: 5px;
+									overflow: hidden;
+									white-space: nowrap;
+									text-overflow: ellipsis;
+									color: black;
+									text-decoration: none;"></a>
+					</div>
+				</div>
+			</div> 
+		</div>
+	  </div>
+
+	<div th:replace="shop/footer.html"></div>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.0.min.js" ></script>
+<script>
+
+
+</script>
+</body>
+</html>

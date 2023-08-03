@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+		/* 브라우저 마진과 패딩 리셋 */
+		* {margin:0;padding:0;}
+
+    #bodybox{
+        width: 500px;
+        height: 530px;
+        margin: 0 auto;
+        border: 1px solid #dcdcdc;
+        border-radius: 5px;
+        margin-top: 150px;
+    }
+
+    #title{
+        text-align: center; 
+        margin: 0 auto; 
+        margin-top: 40px; 
+        border-bottom: 1px solid #dcdcdc; 
+        width: 100px; 
+        padding-bottom: 3px;
+    }
+    .info_btn{
+
+        width: 80px;
+        height: 25px;
+        background-color: white;
+        border: 1px solid #dcdcdc;
+        border-radius: 4px;
+    }
+    .info_btn:hover{
+        background-color: #d3d3d3;
+        cursor: pointer;
+    }
+    .nametag {
+        display: block; 
+        text-align: center;
+    }
+    .namebox{
+        display: flex;  
+        margin: 0 auto; 
+        margin-top: 50px; 
+        padding-bottom: 3px; 
+        width: 70%; 
+        border-bottom: 1px solid #dcdcdc;
+
+    }
+    .pw_box , .tel_box{
+        width: 70%;
+        margin: 0 auto;
+        margin-top: 30px;
+        display: none;
+    }
+
+    input[type="password"]  ,input[type="text"] {
+        display: block;
+        width: 98%;
+        height: 40px;  
+        padding-left: 5px;
+    }
+
+    #save_pw , #save_tel{
+        width: 100%; 
+        height: 40px; 
+        padding: 0 8px;
+        border: 1px solid #DCDCDC;
+        border-radius: 5px;
+    }
+    #save_pw:hover , #save_tel:hover{
+        background-color: #d3d3d3;
+        cursor: pointer;
+    }
+  </style>
+<title>MyPage</title>
+</head>
+<body>
+	<div th:replace="shop/header.html"></div>
+    <div id="bodybox" th:if="${session.member != null}">
+        <h2  id="title">My Info</h2>
+        <!-- 처음에 보여지는 MyPage -->
+        <div class="namebox" style="">
+            <span class="nametag" style=" width: 30%;">아이디</span>
+            <span class="nametag" style=" width: 50%;" th:text="${session.member.id}"></span>
+        </div>
+        <div class="namebox">
+            <span class="nametag" style="width: 30%;">비밀번호</span>
+            <span class="nametag" style="width: 50%;">***** </span>
+            <button type="button" id="pw_btn" class="info_btn" style="width: 20%;">변경</button>
+        </div>
+        <div class="namebox">
+            <span class="nametag" style="width: 30%;">이름</span>
+            <span class="nametag" style="width: 50%;" th:text="${session.member.name}"></span>
+        </div>
+        <div class="namebox">
+            <span class="nametag" style=" width: 30%;">전호번호</span>
+            <span class="nametag" style="width: 50%;" th:text="${session.member.tel}"></span>
+            <button type="button" id="tel_btn" class="info_btn" style="width: 20%;">변경</button>
+        </div>
+        <div class="namebox">
+            <span class="nametag" style="width: 30%;">성별</span>
+            <span class="nametag" style="width: 50%;" th:text="${session.member.gender}"></span>
+        </div>
+        <!-- 비밀번호 변경 버튼 클릭 시 보여지는 MyPage -->
+        <div class="pw_box">
+            <input type="password" id="now_pw" placeholder="현재 비밀번호를 입력해 주세요."/>
+        </div>
+        <div class="pw_box">
+            <input type="password" id="new_pw" placeholder="사용할 비밀번호를 입력해 주세요."/>
+        </div>
+        <div class="pw_box">
+            <input type="password" id="new_pw2" placeholder="사용할 비밀번호를 확인해주세요."/>
+        </div>
+        <div class="pw_box">
+            <button type="button" id="save_pw">변경하기</button>
+        </div>
+        <!-- 전화번호 변경 버튼 클릭 시 보여지는 MyPage -->
+        <div class="tel_box">
+            <input type="text" id="new_tel" placeholder=" '-' 를 제외한 휴대폰 번호를 입력해주세요."/>
+        </div>
+        <div class="tel_box">
+            <button type="button" id="save_tel">변경하기</button>
+        </div>
+
+
+    </div>
+	<div th:replace="shop/footer.html" style="margin-top: 150px;"></div>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js" ></script>
+<script th:inline="javascript">
+  /*<![CDATA[*/
+
+  var member = /*[[${session.member}]]*/;
+
+    window.addEventListener('DOMContentLoaded', function() {
+    
+        if (/*[[${session.member}]]*/ !== null) {}else{
+            alert('잘못된 접근입니다.');
+            window.location.href = '/';
+        }
+    
+    });
+
+
+
+$(function() {
+      $('#pw_btn').click(function() {
+        $('.namebox').hide();
+        $('.pw_box').show();
+        $('#bodybox').css({height: '400px'});
+        $('#title').text("비밀번호 변경");
+        $('#title').css({width: '170px'});
+
+      });
+
+      $('#save_pw').click(function() {
+        var now_pw = $("#now_pw").val();
+        var new_pw = $("#new_pw").val();
+        var new_pw2 = $("#new_pw2").val();
+
+       
+        if(now_pw.length == 0){
+            alert("현재 비밀번호를 입력해주세요.");
+            $('#now_pw').focus();
+            return;
+        }
+        if(new_pw.length == 0){
+            alert("사용할 비밀번호를 입력해주세요.");
+            $('#new_pw').focus();
+            return;
+        }
+        if(new_pw2.length == 0){
+            alert("사용할 비밀번호를 입력해주세요.");
+            $('#now_pw').focus();
+            return;
+        }
+
+        if (new_pw !== new_pw2) {
+            alert('비밀번호가 일치하지 않습니다.');
+            $("#new_pw").val("");
+            $("#new_pw2").val("");
+            $('#new_pw').focus();
+            return;
+        }
+
+        $.ajax({
+            url: "/login",
+            data: { 'id': member.id, 'pw': now_pw },
+            method: "POST",
+            dataType: "json"
+        })
+        .done(function(json) {
+            if (json.MemberChk === 0) {
+                $.ajax({
+                    url: "/change_pw",
+                    data: { 'm_idx': member.m_idx, 'id': member.id , 'pw': new_pw },
+                    method: "POST",
+                    dataType: "json"
+                })
+                .done(function(json) {
+                    if (json.MemberChk === 0) {
+                        alert("비밀번호를 변경하였습니다.")
+                        window.location.href = 'logout';
+                    }else{
+                        alert("비밀번호 변경에 실패했습니다.");
+                    }
+                });
+
+            } else {
+                alert("현재 비밀번호를 확인해주세요.");
+            }
+        });
+
+        //console.log(now_pw , new_pw , new_pw2, member.id);
+    
+      });
+});
+
+$(function() {
+      $('#tel_btn').click(function() {
+        $('.namebox').hide();
+        $('.tel_box').show();
+        $('#bodybox').css({height: '300px'});
+        $('#title').text("휴대폰 번호 변경");
+        $('#title').css({width: '200px'});
+
+      });
+
+      $('#save_tel').click(function() {
+
+        var tel = $("#new_tel").val();
+        var m_idx = member.m_idx;
+
+        if (!/^[0-9]+$/.test(tel) || tel.length !== 11) {
+            alert('휴대폰 번호를 확인해주세요.');
+            $('#tel').focus();
+            return;
+  	   }
+
+         $.ajax({
+            url: "/change_tel",
+            data: { 'm_idx':m_idx, 'tel': tel },
+            method: "POST",
+            dataType: "json"
+            })
+            .done(function(json) {
+                if (json.MemberChk === 0) {
+                    alert("휴대폰 번호 변경을 완료했습니다.")
+                    window.location.href = 'logout';
+                }else{
+                    alert("휴대폰 번호 변경에 실패했습니다.");
+                }
+            });
+
+      });   
+});
+
+/*]]*/
+</script>
+</body>
+</html>

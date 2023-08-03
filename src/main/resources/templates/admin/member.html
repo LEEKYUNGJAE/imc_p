@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    #body_box{
+      display: flex;
+      height: 800px;
+      
+    }
+    #box{
+
+      height: 800px;
+      background-color: #f0f0f0;  
+      width: 100%;
+    }
+    #list{
+      
+        width: 800px;
+        background-color: white;
+        margin: 0 auto;
+        border:1px solid #f0f0f0;
+        margin-top: 100px;
+    }
+    .name{
+        width: 80px;
+
+    }
+    .id{
+        width: 120px;
+
+    }
+    .tel{
+        width: 180px;
+
+    }
+    .gen{
+        width: 50px;
+    }
+    .date{
+        width: 190px;
+    }
+    .btn{
+        width: 180px;
+
+    }
+    .list{
+        height: 50px;
+        text-align: center;
+        line-height: 50px;
+    }
+    .keyword{
+      width: 150px;
+      line-height: 40px;
+    }
+    #category{
+      width: 200px;
+      height: 40px;
+      line-height: 40px;
+    }
+    #search{
+      width: 100px;
+      height: 30px;
+      margin: auto 0;
+    }
+
+    /* paging */
+	
+	ol.paging {
+	    list-style:none;
+	}
+	
+	ol.paging li {
+	    float:left;
+	    margin-right:8px;
+	}
+	
+	ol.paging li a {
+	    display:block;
+	    padding:3px 7px;
+	    border:1px solid #d3d3d3;
+	    color:#2f313e;
+	    font-weight:bold;
+	    text-decoration: none;
+	}
+	
+	ol.paging li a:hover {
+	    background: #dcdcdc;;
+	    color:white;
+	    font-weight:bold;
+	}
+	
+	.disable {
+	    padding:3px 7px;
+	    border:1px solid silver;
+	    color:silver;
+	}
+	
+	.now {
+	     padding:3px 7px;
+	    border:1px solid #d3d3d3;
+	    background:#d3d3d3;
+	    color:white;
+	    font-weight:bold;
+	}
+    
+  </style>
+
+
+<title>admin_member</title>
+</head>
+<body>
+  <div id="body_box">
+    <div th:replace="admin/admin_menu.html"></div>
+    <div id="box">
+        <h2 style="margin: 30px 0 0 20px;">[ 회원 관리 ]</h2>
+        <div id="list" >
+            <div style="display: flex; border-bottom: 1px solid">
+                <div class="name list">이름</div>
+                <div class="id list">아이디</div>
+                <div class="tel list">연락처</div>
+                <div class="gen list">성별</div>
+                <div class="date list">가입 일</div>
+                <div class="btn list" > 관리 </div>
+            </div>
+            <div th:if="${session.Admin_member != null}" th:each="mem : ${session.Admin_member}" style="display: flex; border-bottom: 1px solid #F0f0f0;">
+                <div th:text="${mem.name}" class="name list">이름</div>
+                <div th:text="${mem.id}" class="id list">아이디</div>
+                <div th:text="${mem.tel}" class="tel list">연락처</div>
+                <div th:text="${mem.gender}" class="gen list">성별</div>
+                <div th:text="${mem.reg_date}" class="date list">가입 일</div>
+                <div class="btn list" style="display: flex;" >
+                    <button type="button" 
+                        style="width: 80px; 
+                        height: 30px;
+                        margin: auto;"
+                        th:value="${mem.m_idx}"
+                        onclick="MemberDelete(this)"
+                        >
+                        회원 탈퇴
+                    </button>
+                </div>
+            </div>
+            <div th:if="${session.Admin_member == null}" style="height:350px; text-align:center; line-height: 350px;">
+                <div>
+                    검색 된 내용이 없습니다.
+
+                </div>
+            </div>
+            <div style="margin:auto; width: 400px; height: 40px; ">
+              <select id="category" style="width: 120px; height: 30px; text-align: center;">
+                <option value="1">아이디</option>
+                <option value="2">이름</option>
+                <option value="3">성별</option>
+                <option value="4">가입 일</option>
+              </select>
+              <input type="text" id="text" class="keyword" style="height: 25px;"/>
+              <select id="gender" class="keyword" style="display: none;height: 30px; text-align:center; padding: 3px;">
+                <option value="0">남</option>
+                <option value="1">여</option>
+              </select>
+              <input type="date" id="date" class="keyword" style="display: none; text-align: center; height: 25px;" >
+              <button type="button" id="search"> 검색 </button>
+            </div>
+            <div th:if="${session.page != null}" style="height: 40px; border-top: 1px solid #f0f0f0;">
+              <div style="margin-left: 30px; margin-top: 5px;" th:utext="${session.page}"> </div>
+            </div>
+        </div>
+    </div>
+
+    
+  </div>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js" ></script>
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  
+  var category = 1;
+  var keyword = null ;
+
+  $(function() {
+
+    $("#category").change(function(){
+      category = $("#category").val();
+      if(category === "1" ||category=== "2"){
+        $(".keyword").hide();
+        $("#text").show();
+        keyword = null;
+      }
+      if(category === "3"){
+        $(".keyword").hide();
+        $("#gender").show();
+        keyword = 0;
+      }
+      if(category === "4"){
+        $(".keyword").hide();
+        $("#date").show();
+        keyword = null;
+      }
+    });
+
+    $(".keyword").change(function(){
+      category = $("#category").val();
+      if(category === "1" ||category=== "2"){
+        keyword = $("#text").val();
+      }
+      if(category === "3"){
+        keyword = $("#gender").val();
+      }
+      if(category === "4"){
+        keyword = $("#date").val();
+      }
+    });
+  });
+
+  $(function(){
+
+
+    $("#search").click(function(){
+
+
+      if (category !== null && keyword !== null) { 
+        window.location.href = "member?category="+category +"&text="+keyword;
+      }else{
+        alert("검색할 내용을 입력해주세요.");
+      }
+
+    });
+  });
+
+
+  function MemberDelete (member) {
+    var m_idx = member.value ;
+    console.log(m_idx);
+
+    if(confirm("정말로 탈퇴하시겠습니까?")){
+       
+      $.ajax({
+        url: "/memberdel",
+        type: "post",
+        data: { 'm_idx': m_idx },
+        dataType: "json",
+      }).done(function (data) {
+
+        if(data.chk === 1){
+          alert("정상 적으로 처리했습니다.");
+          window.location.href="member";
+        }
+      });
+        
+    }else{
+
+        console.log("승인 거절");
+    }
+
+  }
+
+/*]]*/
+</script>
+</body>
+</html>

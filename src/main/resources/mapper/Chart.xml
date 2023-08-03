@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pro.shop.mapper.ChartMapper">
+
+<select id="chart" resultType="com.pro.shop.VO.ChartVO">
+    SELECT
+    (SELECT COUNT(*) FROM member WHERE reg_date = CURDATE()) AS member,
+    (SELECT COUNT(*) FROM comment WHERE write_date = CURDATE()) AS comment,
+    (SELECT COUNT(*) FROM bbs WHERE write_date = CURDATE() AND bname = 'BBS') AS bbs,
+    (SELECT COUNT(*) FROM bbs WHERE write_date = CURDATE() AND bname = 'transaction') AS transaction,
+    (SELECT COUNT(*) FROM bbs WHERE write_date = CURDATE() AND bname = 'inquire') AS inquire
+</select>
+
+</mapper>

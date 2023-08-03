@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+
+<title>login</title>
+<style>
+  #loginbox{
+
+    width: 500px;
+    height: 300px;
+    margin: 0 auto;
+    border: 1px solid #dcdcdc;
+    border-radius: 5px;
+    margin-top: 150px;
+  }
+  #loginbox > input{
+    width: 70%;
+		height: 30px;
+		padding: 4px;
+		margin: 0 auto;
+
+  }
+
+  .find {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100%;
+}
+
+.find > a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 13px;
+  text-decoration: underline;
+  color: black;
+  
+}
+
+.find:hover {
+  cursor: pointer;
+  font-weight: bold;
+}
+</style>
+</head>
+<body>
+  <div th:replace="shop/header.html"></div>
+  <div id="loginbox">
+    <h2 style="width: 100%; text-align: center; margin-top: 30px;">LOGIN</h2>
+    <input type="text"  id="userid" style="display: block; margin-top: 30px;" placeholder="아이디를 입력해주세요">
+    <input type="password"  id="password" style="display: block; margin-top: 20px;" placeholder="비밀번호를 입력해주세요">
+
+    <input type="button" style="
+      display: block;
+      width: 72%;
+		  height: 40px;
+		  margin: 0 auto;
+      margin-top: 20px;" id="gologin" value="로그인"/>
+  </div>
+  <div style="width: 500px; height: 30px; margin: 0 auto; text-align: center;">
+    <div style="display: flex; align-items: center; justify-content: center; width: 300px; height: 30px; margin: 0 auto; text-align: center;">
+      <label class="find"><a href="/join">회원 가입</a></label>
+    </div>
+  </div>
+
+	<div th:replace="shop/footer.html"></div>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js" ></script>
+<script th:inline="javascript">
+/*<![CDATA[*/
+
+window.addEventListener('DOMContentLoaded', function() {
+
+ if (/*[[${session.member}]]*/ !== null) {
+	 alert('로그아웃 후 이용가능한 페이지 입니다.');
+	 window.location.href = '/';
+   }
+ 
+});
+
+  $("#gologin").click(function(){
+
+    var id = $("#userid").val();
+    var pw = $("#password").val();
+
+    var idRegex = /^[A-Za-z0-9]+$/;
+
+	
+    if(id.length == 0){
+      alert('아이디를 입력해주세요.');
+      $('#userid').focus();
+          return;
+    }else if (!idRegex.test(id) ) {
+          alert('아이디는 영문자와 숫자만 입력 가능합니다.');
+      $('#userid').focus();
+          return;
+    }
+
+    if(pw.length==0){
+		  alert('비밀번호를 입력해주세요.');
+      return;
+	  }
+
+    $.ajax({
+      url: "/login",
+      data: { 'id': id, 'pw': pw },
+      method: "POST",
+      dataType: "json"
+    })
+    .done(function(json) {
+      if (json.MemberChk === 0) {
+        window.location.href = "/";
+      } else {
+        alert("아이디 및 비밀번호를 확인해주세요.");
+      }
+    })
+    .fail(function(xhr, textStatus, errorThrown) {
+      alert("아이디 및 비밀번호를 확인해주세요.");
+    });
+
+
+  }); 
+
+/*]]*/  
+
+</script>
+</body>
+</html>

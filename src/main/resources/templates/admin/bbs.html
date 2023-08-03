@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <style>
+    * {
+      padding: 0;
+      margin: 0;
+    }
+    #body_box{
+      display: flex;
+      height: 800px;
+      
+    }
+    #box{
+      height: 800px;
+      background-color: #f0f0f0;
+      width: 100%;
+    }
+    #list{
+        width: 1200px;
+        border: 1px solid #DCDCDC;
+        background-color: white;
+        margin: 0 auto;
+        margin-top: 50px;
+    }
+    #table{
+        width: 1200px;
+        border-collapse: collapse;
+    }
+
+    tr > th ,tr > td{
+        font-size:  12px;
+        text-align: center;
+        border-bottom: 1px solid #F0f0f0;
+        height: 50px;
+    }
+   th:nth-child(1) ,td:nth-child(1){
+        width: 50px;
+    }
+    th:nth-child(2) , td:nth-child(2){
+        width: 350px;
+        
+    }
+    tr > td:nth-child(2){
+        text-align: left;
+        margin-left: 10px;
+    }
+    th:nth-child(3) , td:nth-child(3){
+        width: 100px;
+    }
+    th:nth-child(4) , td:nth-child(4){
+        width: 100px;
+    }
+
+
+    table tfoot ol.paging {
+	    list-style:none;
+	}
+	
+	table tfoot ol.paging li {
+	    float:left;
+	    margin-right:8px;
+	}
+	
+	table tfoot ol.paging li a {
+	    display:block;
+	    padding:3px 7px;
+	    border:1px solid #d3d3d3;
+	    color:#2f313e;
+	    font-weight:bold;
+	    text-decoration: none;
+	}
+	
+	table tfoot ol.paging li a:hover {
+	    background: #dcdcdc;;
+	    color:white;
+	    font-weight:bold;
+	}
+	
+	.disable {
+	    padding:3px 7px;
+	    border:1px solid silver;
+	    color:silver;
+	}
+	
+	.now {
+	     padding:3px 7px;
+	    border:1px solid #d3d3d3;
+	    background:#d3d3d3;
+	    color:white;
+	    font-weight:bold;
+	}
+    
+
+    
+  </style>
+
+
+
+<title>admin_main</title>
+</head>
+<body>
+  <div id="body_box">
+    <div th:replace="admin/admin_menu.html"></div>
+    <div id="box">
+        <h2 style="margin: 30px 0 0 20px;">[ 게시글 관리 ]</h2>
+        <div id="list">
+            <table id="table">
+                <thead style="height: 50px;">
+                    <tr style="height: 50px;">
+                        <th>글 번호</th>
+                        <th>제목</th>
+                        <th>작성자</th>
+                        <th>작성 일</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${session.bbs!=null}" th:each="bbs : ${session.bbs}">
+                      <td th:text="${bbs.b_idx}"></td>
+                      <td style="text-align: left; margin-left: 30px;">
+                        <a th:href="@{/adminview(b_idx=${bbs.b_idx})}" style="height: 100%; width: 100%;">
+                        <span th:text="${bbs.subject} + (${#lists.size(bbs.c_list) > 0 ? ' (' + #lists.size(bbs.c_list) + ')' : ''})"
+                            style="overflow: hidden; white-space: nowrap;text-overflow: ellipsis; display: block; width: 600px;"
+                          ></span>
+                      </a>
+                    </td>
+                      <td th:text="${bbs.id}"></td>
+                      <td th:text="${bbs.write_date}"></td>
+                    </tr>
+                    <tr th:if="${session.bbs == null}">
+                      <td colspan="4">
+                        <div> 게시물이 존재하지 않습니다.</div> 
+                      </td>
+                    </tr>
+                  </tbody>  
+                <tfoot>
+                    <tr>
+                      <th colspan="4">
+                          <div style="margin-left: 20px; width: 50%;" th:utext="${session.page}"></div>
+                      </th>
+                    </tr>
+                    <tr>
+                      <td colspan="4">
+                        <div id="search_container">
+                          <select id="category" style="width: 120px; height: 30px; text-align: center;">
+                            <option value="1">제목</option>
+                            <option value="2">작성자</option>
+                            <option value="3">내용</option>
+                            <option value="4">제목+내용</option>
+                          </select>
+                          <input type="text" id="text"  style="width: 200px; height: 26px; padding-left: 2px;"/>
+                          <button type="button" id="search">검색</button>
+                        </div>
+                      </td>
+                    </tr>
+                </tfoot>
+            </table>
+
+
+        </div>
+    </div>
+
+    
+  </div>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js" ></script>
+<script th:inline="javascript">
+  /*<![CDATA[*/
+
+  $(function(){
+  $('#search').click(function(){
+    var category = $("#category").val();
+    var text =  $("#text").val();
+
+    if (category !== null && text.trim().length >= 1) { 
+        window.location.href = "adminbbs?category="+category +"&text="+text;
+    }else{
+      alert("검색할 내용을 입력해주세요.");
+      $("#text").focus();
+    }
+
+  });
+});
+
+  $(function(){
+  $('#write').click(function(){ 
+    window.location.href="/adminwrite?type=notification"
+  });
+});
+
+  
+/*]]*/
+</script>
+</body>
+</html>

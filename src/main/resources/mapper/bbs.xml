@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pro.shop.mapper.BbsMapper">
+
+<resultMap type="com.pro.shop.VO.BbsVO" id="commap">
+		<id property="b_idx" column="b_idx"/>
+		<collection property="c_list" ofType="com.pro.shop.VO.ComVO"
+				select="com.pro.shop.mapper.ComMapper.c_list" column="b_idx"/>
+</resultMap>
+
+  <!--글 쓰기 -->
+  <insert id= "write"  parameterType="Map">
+    INSERT INTO board.bbs (`subject`, `m_idx`, `content`, `file_name`, `ori_name`, `write_date`, `ip`, `hit`, `bname`, `status`, `price`) 
+    VALUES (#{subject},#{m_idx}, #{content}  , #{file_name}, #{ori_name} , DATE_FORMAT(NOW(), '%Y-%m-%d'), #{ip}, '0',#{bname}, '0', #{price})
+  </insert>
+
+  <!-- 전체 게시물의 수 -->
+  <select id="bbs_cnt" resultType="int" parameterType="String">
+    SELECT COUNT(*) AS row_count
+    FROM board.bbs
+    WHERE bname=#{bname} AND status=0;
+  </select>
+
+  <!-- 글 목록 불러오기 -->
+  <select id="bbslist" resultMap="commap" parameterType="Map">
+    SELECT a.* , m.id 
+    FROM(SELECT @RN:= @RN+1 AS rownnum, b.*
+      FROM (SELECT * FROM board.bbs
+          WHERE status = 0 AND bname = #{bname}) b, (SELECT @RN:= 0) r 
+          ORDER BY b_idx DESC ) a join board.member as m  on a.m_idx= m.m_idx
+           
+    WHERE rownnum BETWEEN #{begin} AND #{end}
+  </select>
+  <!-- 자유게시판 베스트글 불러오기 -->
+  <select id="bestbbs" resultMap="commap">
+    SELECT list.* 
+    FROM (SELECT ROW_NUMBER() OVER (ORDER BY bbs.hit DESC) AS n, bbs.*,member.id FROM board.bbs JOIN board.member ON bbs.m_idx = member.m_idx
+    WHERE bbs.bname = 'BBS' AND bbs.status = 0 ) AS list
+    WHERE n BETWEEN 1 AND 10;
+  </select>
+
+  <select id="besttransaction" resultMap="commap">
+    SELECT list.* 
+    FROM (SELECT ROW_NUMBER() OVER (ORDER BY bbs.hit DESC) AS n, bbs.*,member.id FROM board.bbs JOIN board.member ON bbs.m_idx = member.m_idx
+    WHERE bbs.bname = 'transaction' AND bbs.status = 0 ) AS list
+    WHERE n BETWEEN 1 AND 10;
+  </select>
+
+  <!-- 검색 한 게시물의 수 -->
+  <select id="searchcnt" resultType="int" parameterType="Map">
+  SELECT COUNT(*) AS row_count
+  FROM  board.bbs JOIN board.member on bbs.m_idx = member.m_idx
+  WHERE status =  0 AND
+  <if test="bname != null">
+    bname = #{bname} AND
+  </if>
+  <if test="category == 1">
+    subject LIKE CONCAT('%', #{keyword}, '%')
+  </if>
+  <if test="category == 2">
+    id LIKE CONCAT('%', #{keyword}, '%')
+  </if>
+  <if test="category == 3">
+    content LIKE CONCAT('%', #{keyword}, '%')
+  </if>
+  <if test="category == 4">
+    (subject  LIKE CONCAT('%', #{keyword}, '%') OR content  LIKE CONCAT('%', #{keyword}, '%'))
+  </if>
+</select>
+
+<!-- 검색한 게시물 -->
+<select id="searchlist" parameterType="map" resultMap="commap">
+SELECT * FROM (
+  SELECT 
+    ROW_NUMBER() OVER (ORDER BY b_idx DESC) AS num,
+    bbs.*,
+    member.id
+  FROM bbs
+  JOIN member ON bbs.m_idx = member.m_idx
+  WHERE status = 0 AND
+  <if test= "bname != null">
+    bname= #{bname} AND 
+  </if>
+  <if test="category == 1">
+    subject LIKE CONCAT('%', #{keyword}, '%')
+  </if>
+  <if test="category == 2">
+    id LIKE CONCAT('%', #{keyword}, '%')
+  </if>
+  <if test="category == 3">
+    content LIKE CONCAT('%', #{keyword}, '%')
+  </if>
+  <if test="category == 4">
+    (subject  LIKE CONCAT('%', #{keyword}, '%') OR content  LIKE CONCAT('%', #{keyword}, '%'))
+  </if>
+  ) AS sub
+  WHERE num BETWEEN #{begin} AND #{end}
+</select>
+
+
+  <!-- 선택한 글 보기 -->
+  <select id="view" resultMap="commap" parameterType="String">
+    SELECT  bbs.* , member.id FROM bbs JOIN member on bbs.m_idx = member.m_idx
+    WHERE bbs.b_idx = #{b_idx}
+  </select>
+
+
+  <!-- 게시물 수정-->
+  <update id="edit" parameterType="com.pro.shop.VO.BbsVO">
+      UPDATE board.bbs 
+      <trim prefix="SET" suffixOverrides=",">
+        <if  test="subject != null">
+          subject = #{subject},
+        </if>	
+        <if  test="content != null">
+          content  = #{content},
+        </if>		
+        <if  test="file_name != null">
+          file_name  = #{file_name},
+          ori_name =#{ori_name},				
+        </if>		
+      </trim>
+      WHERE b_idx = #{b_idx}
+  </update>
+
+  <!-- 게시물 삭제 -->
+  <update id="delete" parameterType="String">
+  UPDATE board.bbs SET status = '1' 
+  WHERE b_idx = #{b_idx}
+  </update>
+  
+  <!-- 게시물 조회 수 -->
+  <update id="hit" parameterType="String">
+  UPDATE board.bbs SET hit = hit+1 
+  WHERE b_idx = #{b_idx}
+  </update>
+
+  <select id="admincnt" resultType="int">
+    SELECT COUNT(*) AS row_count
+    FROM board.bbs
+    WHERE bname != 'notification' AND bname != 'inquire' AND status=0;
+  </select>
+
+  <select  id="adminbbs" resultMap="commap" parameterType="map">
+      SELECT a.* , m.id FROM(
+      SELECT @RN:= @RN+1 AS rownnum, b.*  
+      FROM (SELECT * FROM board.bbs
+          WHERE status = 0 AND bname != 'notification' AND bname != 'inquire') b, (SELECT @RN:= 0) r
+                ORDER BY b_idx DESC
+      ) a join board.member as m  on a.m_idx= m.m_idx
+      WHERE rownnum BETWEEN #{begin} AND #{end};
+
+  
+  </select>
+
+</mapper>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.pro.shop.mapper.ComMapper">
+
+<select id="c_list"    resultType="com.pro.shop.VO.ComVO"    parameterType="String" >
+    SELECT c.*,m.id FROM board.comment as c join member as m on c.m_idx = m.m_idx
+    WHERE b_idx=#{b_idx} AND status =0
+    ORDER BY c_idx DESC
+</select>
+
+<insert id="comment" parameterType="Map">
+  INSERT INTO board.comment (b_idx, m_idx, content, write_date, ip, status)
+  VALUES (#{b_idx},#{m_idx}, #{content},DATE_FORMAT(NOW(), '%Y-%m-%d'), #{ip}, 0)
+</insert>
+
+<update id="delete" parameterType="String">
+  UPDATE board.comment SET status = '1' 
+  WHERE c_idx = #{c_idx}
+</update>
+  
+</mapper>

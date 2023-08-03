@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>admin_login</title>
+
+  <style>
+    #background{
+        background-image: url( "file_upload/camping.jpg" );
+		background-size: cover;
+        width: 100%;
+        height: 700px;
+        padding-top: 200px;
+    }
+    #loginbox{
+
+        width: 500px;
+        height: 300px;
+        margin: 0 auto;
+        border: 1px solid black;
+        border-radius: 10px;
+        background-color: white;
+    }
+    #loginbox > input{
+        width: 70%;
+        height: 30px;
+        padding: 4px;
+        margin: 0 auto;
+
+    }
+
+    .find {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100px;
+        height: 100%;
+    }
+
+    .find > a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        font-size: 13px;
+        text-decoration: underline;
+        color: black;
+    }
+
+    .find:hover {
+        cursor: pointer;
+        font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+<div id="background">
+        <div id="loginbox">
+            <h2 style="width: 100%; text-align: center; margin-top: 30px;">LOGIN</h2>
+            <input type="text"  id="userid" style="display: block; margin-top: 30px;" placeholder="아이디를 입력해주세요">
+            <input type="password"  id="password" style="display: block; margin-top: 20px;" placeholder="비밀번호를 입력해주세요">
+        
+            <input type="button" style="
+              display: block;
+              width: 72%;
+                  height: 40px;
+                  margin: 0 auto;
+              margin-top: 20px;" id="gologin" value="로그인"/>
+          </div>
+          <div style="width: 500px; height: 30px; margin: 0 auto; text-align: center;">
+            <div style="display: flex; align-items: center; justify-content: center; width: 300px; height: 30px; margin: 0 auto; text-align: center;">
+              <label class="find"><a href="/adminjoin">회원 가입</a></label>
+            </div>
+        </div>
+</div>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.0.min.js" ></script>
+<script>
+
+    $(function(){
+
+        $("#gologin").click(function(){
+            var id = $("#userid").val();
+            var pw = $("#password").val();
+
+            if(id.trim().length > 0 && pw.trim().length > 0 ){
+
+
+                $.ajax({
+                    url : "admin/login",
+                    type : "POST",
+                    data : {'id':id , 'pw' : pw},
+                    dataType :  "json"      
+                }).done(function (data){
+                    console.log(data)
+                    if(data.activate ==="1"){
+
+                        window.location.href="/admin/main"
+                    }else if(data.activate === "2"){
+                        alert("가입승인 후 이용가능한 아이디 입니다.");
+                    }else if (data.activate === "0"){
+                        alert("아이디 및 비밀번호를 확인해주세요.");
+                        $("#userid").val("");
+                        $("#password").val("");
+                        $("#userid").focus();
+                    }
+
+                });
+
+
+            }else if (id.trim().length == 0 ){
+                alert("아이디를 입력해주세요.");
+                $("#userid").focus();
+            }else if (pw.trim().length == 0  ){
+                alert("비밀번호를를 입력해주세요.");
+                $("#password").focus();
+            }
+        });
+    });
+
+
+</script>
+</body>
+</html>

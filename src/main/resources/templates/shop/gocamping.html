@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <style>
+	/* 브라우저 마진과 패딩 리셋 */
+	* {margin:0;padding:0;}
+
+    #cam_container{
+        
+        width: 1200px;
+        height: 600px;
+        display: flex; 
+        margin:0 auto;
+        margin-top: 50px;
+        border-bottom: 1px solid #D3D3D3;
+    }
+    #kakao_map , #search_menu{
+        
+        width: 600px;
+        height: 100%;
+        text-align: center;
+    }
+    #map{
+        width: 500px;
+        height: 500px;
+        border-radius: 8px;
+        margin: 50px  auto;
+    }
+
+    .select{
+        width: 400px; height: 80px; text-align: center; font-size: 20px; border-radius: 5px;
+    }
+
+    #Data_Container{
+        width: 1000px;
+        height: 1100px;
+        margin: 0 auto;
+        margin-top:  50px;
+        border-bottom: 1px solid #F0f0f0;
+       
+    }
+
+    /* 페이지*/
+    ol.paging {
+	    list-style:none;
+	}
+	
+	ol.paging li {
+	    float:left;
+	    margin-right:8px;
+	}
+	
+	ol.paging li a {
+	    display:block;
+	    padding:3px 7px;
+	    border:1px solid #d3d3d3;
+	    color:#2f313e;
+	    font-weight:bold;
+	    text-decoration: none;
+	}
+	
+    ol.paging li a:hover {
+	    background: #dcdcdc;;
+	    color:white;
+	    font-weight:bold;
+	}
+	
+	.disable {
+	    padding:3px 7px;
+	    border:1px solid silver;
+	    color:silver;
+	}
+	
+	.now {
+	     padding:3px 7px;
+	    border:1px solid #d3d3d3;
+	    background:#d3d3d3;
+	    color:white;
+	    font-weight:bold;
+	}
+ /*
+ 카카오 마커 CSS
+ */
+     .wrap {position: absolute;left: 0;bottom: 40px;width: 288px;height: 132px;margin-left: -144px;text-align: left;overflow: hidden;font-size: 12px;font-family: 'Malgun Gothic', dotum, '돋움', sans-serif;line-height: 1.5;}
+    .wrap * {padding: 0;margin: 0;}
+    .wrap .info {width: 286px;height: 120px;border-radius: 5px;border-bottom: 2px solid #ccc;border-right: 1px solid #ccc;overflow: hidden;background: #fff;}
+    .wrap .info:nth-child(1) {border: 0;box-shadow: 0px 1px 2px #888;}
+    .info .title {padding: 5px 0 0 10px;height: 30px;background: #eee;border-bottom: 1px solid #ddd;font-size: 18px;font-weight: bold;}
+    .info .close {position: absolute;top: 10px;right: 10px;color: #888;width: 17px;height: 17px;background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/overlay_close.png');}
+    .info .close:hover {cursor: pointer;}
+    .info .body {position: relative;overflow: hidden;}
+    .info .desc {position: relative;margin: 13px 0 0 90px;height: 75px;}
+    .desc .ellipsis {overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
+    .desc .jibun {font-size: 11px;color: #888;margin-top: -2px;}
+    .info .img {position: absolute;top: 6px;left: 5px;width: 73px;height: 71px;border: 1px solid #ddd;color: #888;overflow: hidden;}
+    .info:after {content: '';position: absolute;margin-left: -12px;left: 50%;bottom: 0;width: 22px;height: 12px;background: url('https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/vertex_white.png')}
+    .info .link {color: #5085BB;}
+  </style>
+  <title>GO CAMPING</title>
+</head>
+<body>
+	<div th:replace="shop/header.html"></div>
+    <div id="cam_container">
+        <div id="kakao_map">
+            <div id="map"></div>
+
+        </div>
+        <div id="search_menu">
+            <div>
+                <select id="region" class="select" style="margin-top: 150px;" onchange="handleRegionChange(this.value)">
+                    <option value="null">지역을 선택해주세요.</option>
+                    <option value="서울">서울</option>
+                    <option value="부산">부산</option>
+                    <option value="대구">대구</option>
+                    <option value="인천">인천</option>
+                    <option value="광주">광주</option>
+                    <option value="울산">울산</option>
+                    <option value="경기">경기</option>
+                    <option value="강원도">강원도</option>
+                    <option value="충청남도">충청남도</option>
+                    <option value="경상북도">경상북도</option>
+                    <option value="경상남도">경상남도</option>
+                    <option value="전라북도">전라북도</option>
+                    <option value="전라남도">전라남도</option>
+                    <option value="제주">제주</option>
+                    <option value="세종">세종</option>
+                  </select>
+            </div>
+            <div>
+                <select id="category" class="select"  style="margin-top: 8px;" onchange="handleCategoryChange(this.value)">
+                    <option value="null">카테고리를 선택해주세요.</option>
+                    <option value="카라반">카라반</option>
+                    <option value="글램핑">글램핑</option>
+                    <option value="야영장">야영장</option>
+                    <option value="자동차">자동차</option>
+                  </select>
+            </div>
+            <div>
+                <button style="width: 400px; height: 80px; margin-top: 8px; font-size: 20px;" onclick="GoSelect()">검색하기</button>
+            </div>
+        </div>
+    </div>
+    <div id="Data_Container" th:if="${session.list !=null}">
+        <div style="width: 1000px; height: 60px; background-color: #f0f0f0; margin-bottom: 5px;">
+            <h2 style="height: 100%; width: 100%; text-align: center; line-height: 60px;" >목 록</h2>
+        </div>
+        <div th:if="${session.list != null}" th:each="vo : ${session.list}" class="Cam_list" style="display: flex; width: 1000px; height: 200px; border-bottom: 1px solid #F0f0f0;">
+            <div class="Cam_img" style="height: 200px; width: 200px;" >
+                <img th:if="${vo.image.length() == 0}" src="file_upload/noimg.jpg" style="display: block; width: 180px; height: 180px; margin: 10px auto; border-radius: 5px; border: 1px solid #F0F0F0;" />
+                <img th:if="${vo.image.length() > 0}" th:src="${vo.image}" style="display: block; width: 180px; height: 180px; margin: 10px auto; border-radius: 5px; border: 1px solid #F0F0F0;" />
+            </div>
+            <div class="Cam_Detail" style="width: 800px; height: 200px;">
+                <div style=" display: flex; width:800px; height: 50px; border-bottom: 1px solid #F0f0f0;">
+                    <div style="width: 400px; display: flex;">
+                        <p style="width: 80px; height: 100%; line-height: 50px; text-align: center;">업체</p>
+                        <p style="width: 320px; height: 100%; line-height: 50px;" th:text="${': ' + vo.title}"></p>
+                    </div>
+                    <div style="width: 400px;">
+                        <div style="width: 400px; display: flex;">
+                            <p style="width: 80px; height: 100%; line-height: 50px; text-align: center;">카테고리</p>
+                            <p style="width: 320px; height: 100%; line-height: 50px;" th:text="${': ' + vo.category}"></p>
+                        </div>
+                    </div>
+                </div>
+                <div style=" display: flex; width:800px; height: 50px; border-bottom: 1px solid #F0f0f0;">
+                    <div style="width: 800px; display: flex;">
+                        <p style="width: 80px; height: 100%; line-height: 50px; text-align: center;">주소</p>
+                        <p style="width: 720px; height: 100%; line-height: 50px;" th:text="${': ' + vo.addr}"></p>
+                    </div>
+                </div>
+                <div style=" display: flex; width:800px; height: 50px; border-bottom: 1px solid #F0f0f0;">
+                    <div style="width: 400px;">
+                        <div style="width: 400px; display: flex;">
+                            <p style="width: 80px; height: 100%; line-height: 50px; text-align: center;">연락처</p>
+                            <p style="width: 320px; height: 100%; line-height: 50px;"  th:text="${': ' + vo.tel}"></p>
+                        </div>
+                    </div>
+                    <div style="width: 400px; display: flex;">
+                        <p style="width: 80px; height: 100%; line-height: 50px; text-align: center;" >예약방법</p>
+                        <p style="width: 320px; height: 100%; line-height: 50px;" th:text="${': ' + vo.manner}"></p>
+                    </div>
+                </div>  
+                <div style=" display: flex; width:800px; height: 50px;">
+                    <div style="width: 400px;">
+                        <div style="width: 400px; display: flex;">
+                            <p style="width: 80px; height: 100%; line-height: 50px; text-align: center;">애완동물</p>
+                            <p style="width: 320px; height: 100%; line-height: 50px;" th:text="${': ' + vo.animal}"></p>
+                        </div> 
+                    </div>
+                    <div style="width: 400px; display: flex;">
+                        <a th:if="${vo.page.length() > 0}" th:href="@{${vo.page}}" style="display: block; border: 1px solid; border-radius: 5px; width: 150px; height: 30px; text-align: center; line-height: 30px; margin: auto;">홈페이지</a>
+                    </div>
+                </div>  
+            </div>
+        </div>
+    </div>
+    <div style="margin: 0 auto; width: 1000px; height: 60px; text-align: center;  margin-top:20px;">
+        <label  th:utext="${session.page}" ></label>
+    </div>
+
+	<div th:replace="shop/footer.html"></div>
+
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.2.0.min.js" ></script>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=8c6d8f9bb1a65e4b47996693c0050af4"></script>
+<script th:inline="javascript">
+/*<![CDATA[*/
+
+    var region = null;
+    var category  = null;
+
+
+    window.onload = kakao_map; 
+
+    function kakao_map() {
+        var list = /*[[${session.list}]]*/;
+
+        var y = 37.553505;
+        var x = 126.969641;
+
+        if (list !== null) {
+            console.log(list);
+
+            y = list[0].mapY;
+            x = list[0].mapX;
+            console.log(y, x);
+        }
+
+        var container = document.getElementById('map');
+        var options = {
+            center: new kakao.maps.LatLng(y, x),
+            level: 10
+        };
+
+        var map = new kakao.maps.Map(container, options);
+
+        if (list !== null) {
+            for (var i = 0; i < list.length; i++) {
+            var markerPosition = new kakao.maps.LatLng(list[i].mapY, list[i].mapX);
+
+            var marker = new kakao.maps.Marker({
+                position: markerPosition,
+                map: map,
+            });
+
+            var overlayContent = '<div class="wrap">' +
+                '    <div class="info">' +
+                '        <div class="title">' + list[i].title +
+                '        </div>' +
+                '        <div class="body">' +
+                '            <div class="img">' +
+                '                <img src="' + list[i].image + '" width="73" height="70">' +
+                '           </div>' +
+                '            <div class="desc">' +
+                '                <div class="ellipsis">' + list[i].addr + '</div>' +
+                '                <div><a href="' + list[i].page + '" target="_blank" class="link">홈페이지</a></div>' +
+                '            </div>' +
+                '        </div>' +
+                '    </div>' +
+                '</div>';
+
+            var overlay = new kakao.maps.CustomOverlay({
+                content: overlayContent,
+               position: marker.getPosition()
+            });
+
+            kakao.maps.event.addListener(marker, 'click', makeClickListener(overlay));
+            }
+        }
+
+        function makeClickListener(overlay) {
+            return function() {
+            overlay.setMap(map);
+            };
+        }
+
+        
+    }
+        function closeOverlay() {
+                overlay.setMap(null);
+            }
+    function handleRegionChange(value) {
+        region = value;
+    }
+
+    function handleCategoryChange(value) {
+        category = value;
+    }
+       
+    function GoSelect() {
+        if(region === null || category === null || region === 'null' || category === 'null') {
+            alert("지역 및 카테고리를 선택해주세요.");
+        }else{
+            window.location.href = 'gocamping?region='+region+"&category="+category;
+        }
+
+    }
+ /*]]*/  
+</script>
+</body>

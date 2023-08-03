@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>inquirewrite</title>
+<link rel="stylesheet" href="css/summernote-lite.css"/>
+<style type="text/css">
+	#bbs table {
+		height: 800px;
+	    width:800px;
+	    margin-left:10px;
+	    border-collapse:collapse;
+	    font-size:14px;
+		margin: 0 auto;
+	    
+	}
+	
+	#bbs table th {
+	    text-align:center;
+	    border:1px solid #DCDCDC;
+	    padding:4px 10px;
+		width: 15%;
+	}
+	
+	#bbs table td {
+	    text-align:left;
+	    border:1px solid #DCDCDC;
+	    padding:4px 10px;
+		width: 85%;
+	}
+	
+	.note-editor .note-editable {
+	 line-height: 100%; /*개행 간격을 알맞게 설정*/
+	}	
+	.btn{
+		width: 60px;
+		height: 30px;
+		background-color: white;
+		border: 1px solid #DCDCDC;
+		border-radius: 3px;
+		pointer-events: stroke;
+	}
+
+	.btn:hover{
+
+		background-color: #d3d3d3;
+		cursor: pointer;
+	}
+	.file-input-container {
+		position: relative;
+		display: inline-block;
+	}
+
+	.file-input-container input[type="file"] {
+		position: absolute;
+		top: 0;
+		left: 0;
+		opacity: 0;
+		width: 100%;
+		height: 100%;
+		cursor: pointer;
+	}
+
+	.file-input-container label {
+		display: inline-block;
+		padding: 10px 20px;
+		background-color: white;
+		border: 1px solid #DCDCDC;
+		border-radius: 3px;
+		cursor: pointer;
+	}
+	
+</style>
+
+</head>
+<body>
+	<div th:replace="shop/header.html" ></div>
+	<div id="bbs" style="margin-top: 150px;">
+		<form action="write" method="post" 
+			encType="multipart/form-data">
+			<table>
+				<tbody>
+					<tr>
+						<th>제목</th>
+						<td>
+							<input type="text" id="subject" name="subject"  style="height: 30px; width: 99%; border-radius: 3px; padding-left: 3px;"   size="45"/>
+							<input type="hidden" name="bname" value="inquire"/>
+							<input type="hidden" name="m_idx" th:if="${session.member != null}" th:value="${session.member.m_idx}" />
+						</td>
+					</tr>
+					<tr>
+						<th>글쓴이</th>
+						<td><input type="text" id="name" name="writer" style="border: none; height: 30px;"  size="12" th:if="${session.member != null}" th:value="${session.member.id}" readonly /></td>
+					</tr>
+					<tr>
+						<th>내용</th>
+						<td><textarea id="content" name="content"  cols="50" 
+								rows="8"></textarea></td>
+					</tr>
+					<tr>
+						<th>첨부파일</th>
+						<td>
+							<div class="file-input-container">
+								<input type="file" id="my-file-input" name="file" onchange="displayFileName(this)">
+								<label for="my-file-input">파일 선택</label>
+							</div>
+							<span id="file-name"></span>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2" style="text-align: right;">
+							<button type="button" class="btn" onclick="sendData()">글 쓰기</button>
+							<button type="button" class="btn" onclick="backList()">목록</button>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</form>
+	</div>
+	
+	<div th:replace="shop/footer.html"></div>
+
+
+	<script src="https://code.jquery.com/jquery-3.6.1.min.js" integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ=" crossorigin="anonymous"></script>
+	<script src="js/summernote-lite.js"></script>
+	<script src="js/lang/summernote-ko-KR.js"></script>
+	<script  charset="utf-8">
+		
+		function displayFileName(input) {
+				const fileName = input.files[0].name;
+				const fileNameElement = document.getElementById("file-name");
+				fileNameElement.textContent = fileName;
+		}
+				
+		
+		$(function(){
+			
+			$("#content").summernote({
+				height: 500,
+				lang: "ko-KR",
+				focus: true,/* 커서를 미리 가져다 놓는다. */
+				callbacks:{
+					onImageUpload: function(files, editor){
+						// 이미지가 에디터에 추가될 때마다 수행하는 곳!
+						// ( 추가되는 이미지들은 배열로 인식함! )
+						for(let i=0; i<files.length; i++)
+							sendImage(files[i], editor);// 서버로 비동기식 통신으로
+									// 이미지를 서버로 업로드 시킨다. -- editor_img폴더 저장!
+					}
+				}
+			});
+			
+			$("#content").summernote("lineHeight",1.5);
+			
+		});
+		
+		
+
+
+		function sendImage(file, editor){
+			// 에디터에 이미지가 들어왔을 때 수행하는 곳이다.
+			// 이미지도 파일이므로 Multipart/form-data형식을 따라야 한다.
+			let frm = new FormData();
+			
+			// 보내고자 하는 파일을 위해 만든 FormData에 파라미터를 넣어주자
+			frm.append("s_file", file);
+			
+			//비동기식 통신
+			$.ajax({
+				url: "saveImg",
+				data: frm,
+				type: "post",
+				contentType: false,
+				processData: false,
+				cache: false,
+				dataType: "json",//서버로부터 받을 데이터 형식
+			}).done(function(data){
+				console.log (data.fname);
+				let name = data.fname;
+				//alert(name);
+
+				setTimeout(function() {
+					$("#content").summernote("editor.insertImage",  "/editor_img"+"/"+name);
+				},1000);
+				
+			});
+		}
+		
+		function backList(){
+			location.href="list?cPage=${param.cPage}";
+		}
+
+
+			
+		function sendData() {
+			let subject = $("#subject").val().trim();
+			let content = $("#content").val().trim();
+			var imageExtensions = ["jpg", "jpeg", "png", "gif","JPG","JPEG","PNG","GIF"];
+
+			var fileInput = document.getElementById('my-file-input');
+			
+			var extension ;
+            if(fileInput != null){
+
+                extension  =  FileName(fileInput);
+            }
+            
+			
+			if (subject.length < 1) {
+				alert("제목을 입력해주세요.");
+				return;
+			}
+
+			if (content.length < 1) {
+				alert("내용을 입력해주세요.");
+				return;
+			}
+
+			if(fileInput!= null && fileInput.length>1){
+				var ChkFile = false;
+			
+
+
+				for (var i = 0; i < imageExtensions.length; i++) {
+					
+					if(extension === imageExtensions[i]) {
+						console.log("extension:"+extension);
+						console.log((extension === imageExtensions[i]));
+						ChkFile = true;
+						break;;
+					}
+				}
+
+				if(!ChkFile){
+					alert("첨부 불가능한 파일입니다.");
+					return;
+				}
+
+			}
+			
+			
+			document.forms[0].submit();
+		}
+
+		function FileName(fileInput) {
+			var fullPath = fileInput.value;
+			var filename = fullPath.split('\\').pop().split('/').pop(); // 전체 경로에서 파일 이름 추출
+			var extension = getExtension(filename);
+			console.log(extension); // 확장자 출력
+
+			return extension;
+		}
+
+		
+
+
+		function getExtension(filename) {
+			return filename.split('.').pop();
+		}
+		
+	</script>
+	<script th:inline="javascript"> 
+	/*<![CDATA[*/
+		window.addEventListener('DOMContentLoaded', function() {
+			if (/*[[${session.member}]]*/ !== null) {
+			}else{
+				alert('로그인 후 이용가능한 페이지 입니다.');
+				window.location.href = '/login';
+
+			}
+		});
+		
+	</script>
+	
+</body>
+</html>
+
+
+
+
+
