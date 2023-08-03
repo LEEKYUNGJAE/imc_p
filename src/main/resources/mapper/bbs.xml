@@ -70,6 +70,7 @@
   </if>
 </select>
 
+
 <!-- 검색한 게시물 -->
 <select id="searchlist" parameterType="map" resultMap="commap">
 SELECT * FROM (
