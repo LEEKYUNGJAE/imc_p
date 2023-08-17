@@ -106,7 +106,7 @@
 
   <update id="MemberDelete" parameterType="String">
     UPDATE board.member 
-    SET	 activate = 3
+    SET	 activate = 3 ,  withdrawal_date = CURDATE()
     WHERE m_idx = #{m_idx}
    </update>
 </mapper>

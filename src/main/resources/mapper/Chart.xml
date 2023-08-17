@@ -4,13 +4,49 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.pro.shop.mapper.ChartMapper">
 
-<select id="chart" resultType="com.pro.shop.VO.ChartVO">
+    <select id="chart" resultType="com.pro.shop.VO.ChartVO">
     SELECT
     (SELECT COUNT(*) FROM member WHERE reg_date = CURDATE()) AS member,
     (SELECT COUNT(*) FROM comment WHERE write_date = CURDATE()) AS comment,
     (SELECT COUNT(*) FROM bbs WHERE write_date = CURDATE() AND bname = 'BBS') AS bbs,
     (SELECT COUNT(*) FROM bbs WHERE write_date = CURDATE() AND bname = 'transaction') AS transaction,
     (SELECT COUNT(*) FROM bbs WHERE write_date = CURDATE() AND bname = 'inquire') AS inquire
-</select>
+    </select>
 
+    <select id="NowJoin" resultType="com.pro.shop.VO.ChartVO">
+    SELECT
+        *
+    FROM
+        (SELECT COUNT(*) as NowJoin FROM member WHERE reg_date = CURDATE() AND activate = 0) AS Now,
+        (SELECT COUNT(*) as YesterDayJoin FROM member WHERE reg_date = CURDATE() - 1 AND activate = 0) AS YesterDay
+    </select>
+     <select id="TotalMember" resultType="com.pro.shop.VO.ChartVO">
+        SELECT
+            a.NowJoin,
+            (a.NowJoin - b.YesterDayJoin) AS YesterDayJoin
+        FROM
+            (SELECT COUNT(*) AS NowJoin FROM member WHERE reg_date &lt;= CURDATE() AND activate = 0) AS a,
+            (SELECT COUNT(*) AS YesterDayJoin FROM member WHERE reg_date &lt;= CURDATE() - 1 AND activate = 0) AS b
+    </select>
+    <select id="withdrawal" resultType="com.pro.shop.VO.ChartVO">
+    SELECT * FROM            
+    (SELECT COUNT(*) AS NowJoin  FROM member WHERE activate=3) AS a,
+    (SELECT COUNT(*) AS YesterDayJoin FROM member WHERE activate=3 AND withdrawal_date = CURDATE()) AS b
+    </select>
+
+    <select id="DailyJoin" resultType="com.pro.shop.VO.ChartVO">
+    SELECT DATE_FORMAT(date_range.Date, '%m-%d') AS Date,
+           IFNULL(COUNT(member.reg_date), 0) AS DailyJoin
+        FROM (
+            SELECT CURDATE() - INTERVAL 4 DAY AS Date UNION ALL
+            SELECT CURDATE() - INTERVAL 3 DAY AS Date UNION ALL
+            SELECT CURDATE() - INTERVAL 2 DAY AS Date UNION ALL
+            SELECT CURDATE() - INTERVAL 1 DAY AS Date UNION ALL
+            SELECT CURDATE() AS Date
+                ) AS date_range
+        LEFT JOIN member ON DATE_FORMAT(date_range.Date, '%m-%d') = DATE_FORMAT(member.reg_date, '%m-%d') AND member.activate = 0
+        GROUP BY date_range.Date
+        ORDER BY date_range.Date
+
+    </select>
 </mapper>

@@ -132,12 +132,22 @@ public class AdminController {
             session.removeAttribute("chart");
         }
 
-        ChartVO vo  = C_Service.Chart();
+        ChartVO NowJoin = C_Service.NowJoin();
 
-        System.out.println( vo );
+        ChartVO vo  = C_Service.Chart();
+        
+        ChartVO TotalMember = C_Service.TotalMember();
+
+        ChartVO withdrawal =  C_Service.withdrawal();
+
+        List<ChartVO> DailyJoin = C_Service.DailyJoin();
+
 
         session.setAttribute("chart", vo);
-
+        session.setAttribute("NowJoin", NowJoin);
+        session.setAttribute("TotalMember", TotalMember);
+        session.setAttribute("withdrawal", withdrawal);
+        session.setAttribute("DailyJoin", DailyJoin);
         return "admin/admin_main";
     }
 

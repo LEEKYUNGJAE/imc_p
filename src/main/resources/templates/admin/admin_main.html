@@ -19,6 +19,14 @@
       background-color: #f0f0f0;
       width: 100%;
     }
+
+    #todayChart , #LineChart{
+      width: 300px; 
+      height: 300px; 
+      background-color: white;
+      border-radius: 10px;
+      border-bottom: 1px solid #f0f0f0;
+      }
   </style>
 
 
@@ -28,10 +36,42 @@
   <div id="body_box">
     <div th:replace="admin/admin_menu.html"></div>
     <div id="box">
-      <h2 style="margin: 30px 0 0 20px;">[ 이용 현황 ]</h2>
-      <div style="width: 800px; height:400; margin: 100px auto; background-color: white; border: 1px solid #f0f0f0; border-radius: 10px;">
-        <canvas id="myChart"></canvas>
+      <h2 style="margin: 30px 0 0 20px;">[ 대시보드 ]</h2>
+      
+      <div style="display:flex;  width: 1200px;margin: 50px auto;">
+        <div style="width: 390px;height: 150px; margin-right: 10px; background-color: white; border-radius: 10px;
+        border: 1px solid #f0f0f0;">
+          <h2 style="text-align: center; margin-top: 10px;"> [오늘 가입한 회원] </h2>
+          <h1 style="text-align: center; margin-top: 10px;" th:text="${session.NowJoin.NowJoin}">0</h1>
+          <p style="width: 200px; text-align: center; margin: 5px auto; color: white; background-color: aqua; border-radius: 10px;" th:text="'전날 가입 회원 ' + ${session.NowJoin.YesterDayJoin} + ' 명'"></p>
+        </div>
+        <div style="width: 390px;height: 150px; margin-right: 10px; background-color: white; border-radius: 10px;
+        border: 1px solid #f0f0f0;">
+          <h2 style="text-align: center; margin-top: 10px;"> [누적 가입 회원] </h2>
+          <h1 style="text-align: center; margin-top: 10px;" th:text="${session.TotalMember.NowJoin}"> 0 </h1>
+          <p style="width:200px; text-align: center; margin: 5px auto; color: white; background-color: brown; border-radius: 10px;" th:text="'전일 대비 '+ ${session.TotalMember.YesterDayJoin} +' 명 증가'"></p>
+        </div>
+        <div style="width: 390px;height: 150px; background-color: white; border-radius: 10px;
+        border: 1px solid #f0f0f0;">
+          <h2 style="text-align: center; margin-top: 10px;"> [누적  탈퇴 회원] </h2>
+          <h1 style="text-align: center; margin-top: 10px;" th:text="${session.withdrawal.NowJoin}" > 0 </h1>
+          <p style="width:200px; text-align: center; margin: 5px auto; color: white; background-color: cadetblue; border-radius: 10px;" th:text="'오늘의 탈퇴 회원'+${session.withdrawal.YesterDayJoin}+' 명'">오늘의 탈퇴 회원 0명</p>
+        </div>
       </div>
+      <div style="display:flex;  width: 1200px;margin: 50px auto;">
+        <div  style="width: 600px; height: 300px; background-color: white;
+        border-radius: 10px;
+        border: 1px solid #f0f0f0;">
+          <h2 style="text-align: center; margin-bottom: 10px; margin-top: 5px;"> [오늘의 이용 현황] </h2>
+          <canvas id="todayChart" ></canvas>
+        </div>
+        <div  style="width: 600px; height: 300px; background-color: white;
+          border-radius: 10px;
+          border: 1px solid #f0f0f0;">
+            <h2 style="text-align: center; margin-bottom: 10px; margin-top: 5px;"> [최근 5일 가입 현황] </h2>
+            <canvas id="LineChart" ></canvas>
+          </div>
+          
     </div>
 
     
@@ -40,32 +80,71 @@
 <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js" ></script>
 <script th:inline="javascript">
   /*<![CDATA[*/
-  const ctx = document.getElementById('myChart');
-
   const chart  = /*[[${session.chart}]]*/ ; 
 
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: ['회원가입', '자유게시판','거래게시판', '문의 사항', '댓글 작성'],
-      datasets: [{
-        label: 'Count',
-        data: [chart.member, chart.bbs, chart.transaction, chart.inquire , chart.comment],
-        borderWidth: 1
-      }]
-    },
-    options: {
+  const DailyJoin = /*[[${session.DailyJoin}]]*/ ; 
+
+  console.log(DailyJoin);
+
+  const todayChart = document.getElementById('todayChart');
+
+    var todayChartData = {
+      labels: ['회원가입', '자유게시판', '거래게시판', '문의 사항', '댓글 작성'],
+      datasets: [
+        {
+          data: [chart.member, chart.bbs, chart.transaction, chart.inquire, chart.comment],
+          backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#9C27B0'],
+          hoverBackgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#9C27B0'],
+        },
+      ],
+    };
+
+    var options = {
+      cutoutPercentage: 50,
+      responsive: true,
+      maintainAspectRatio: false,
+    };
+
+    var myTodayChart = new Chart(todayChart, {
+      type: 'doughnut',
+      data: todayChartData,
+      options: options,
+    });
+
+
+    const lineChartData = {
+    labels: [DailyJoin[0].date, DailyJoin[1].date, DailyJoin[2].date, DailyJoin[3].date, DailyJoin[4].date],  // X축 레이블
+    datasets: [
+      {
+        label: '이용 현황',
+        data: [DailyJoin[0].dailyJoin, DailyJoin[1].dailyJoin, DailyJoin[2].dailyJoin, DailyJoin[3].dailyJoin, DailyJoin[4].dailyJoin],  // Y축 데이터
+        borderColor: '#FF6384',  // 라인 색상
+        backgroundColor: 'rgba(255, 99, 132, 0.2)',  // 라인 아래 색상
+        fill: true,
+      },
+    ],
+  };
+
+    const lineChartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
       scales: {
         y: {
-          beginAtZero: true
-        }
-      }
-    }
-  });
+          beginAtZero: true,
+        },
+      },
+    };
 
+    var lineChart = document.getElementById('LineChart');
+
+    var myLineChart = new Chart(lineChart, {
+      type: 'line',
+      data: lineChartData,
+      options: lineChartOptions,
+    });
 
 
 /*]]*/
 </script>
 </body>
-</html>
+</html> 

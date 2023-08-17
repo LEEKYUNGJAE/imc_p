@@ -1,8 +1,6 @@
 package com.pro.shop.Controller;
 
-import java.io.File;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,34 +8,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.ModelAndView;
+
 
 import com.pro.shop.Service.MemService;
 import com.pro.shop.VO.MemVO;
-import com.pro.shop.util.FileUtil;
 
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.http.HttpServletRequest;
+
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class JoinController {
 
-    
-    @Autowired
-	private ServletContext application;
-
-    @Autowired
-	private HttpServletRequest request;
-
     @Autowired
     private MemService m_service;
+
+    @Autowired
+    private HttpSession session;
     
 
 
@@ -94,5 +86,22 @@ public class JoinController {
         return map;
     }
 
+    @RequestMapping(value="/deletemember" , method=RequestMethod.POST)
+    @ResponseBody
+    public int DeleteMember (@RequestParam("m_idx") String m_idx){      
+        int chk = 0;
+        try {   
+            //탈퇴하는 과정
+
+            m_service.MemberDelete(m_idx);
+            
+            chk = 1;
+
+            session.removeAttribute("member");
+
+        } catch (Exception e) {}
+        
+        return chk ; 
+    }
 
 }

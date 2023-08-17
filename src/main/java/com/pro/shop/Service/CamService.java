@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.ibatis.annotations.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.pro.shop.VO.CamVO;
 import com.pro.shop.mapper.CamMapper;
 
-import jakarta.websocket.OnClose;
 
 @Service
 public class CamService {
